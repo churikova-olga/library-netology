@@ -1,0 +1,34 @@
+<%- include("./partials/head", {title: title}) %>
+<%- include("./partials/nav") %>
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4"> Книги</h1>
+        <%if (book.length) {%>
+        <%for (let i = 0; i <book.length; i++) {%>
+
+            <div class="card w-100" style="display: flex;flex-direction: row;justify-content: space-between;align-content: center;">
+                <a href="/book/<%=book[i].id%>" style="text-decoration: none; color: black;">
+                <div class="card-body">
+                    <h3 class="card-title" style="font-family: 'Comic Sans MS'"><%=book[i].title%></h3>
+                </div>
+                </a>
+                <div style="display: flex;align-items: center; margin: 10px">
+                    <a class="btn btn-sm btn-primary" href="/book/update/<%= book[i].id %>" style="margin: 5px;">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </a>
+                    <form action="/book/<%=book[i].id %>" method="POST" class="d-inline">
+                        <button class="btn btn-sm btn-danger" style="margin: 5px;">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        <%}%>
+        <%}else{%>
+        <div> Книг нет</div>
+        <%}%>
+    </div>
+</div>
+

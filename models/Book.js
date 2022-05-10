@@ -4,8 +4,8 @@ class Book {
     constructor(title = "",
                 description = "",
                 authors ="",
-                favorite = "",
-                fileCover = false,
+                favorite = false,
+                fileCover = "",
                 fileName = "",
                 fileBook= "",
                 id = uidGenerator.generateUniqueId()) {

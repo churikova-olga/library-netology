@@ -1,0 +1,43 @@
+<%- include("../partials/head", {title: title}) %>
+<%- include("../partials/nav") %>
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <div class="card">
+            <div class="card-header" style="display: flex;justify-content: space-between;">
+                <h1 class="display-4"> <%=book.title%></h1>
+                <i><%if(book.favorite === 'on'){%> Избранная<%}else{%> Не избранная<%}%></i>
+            </div>
+            <div class="row g-0">
+                <div class="col-md-2">
+                    <img src="../../<%=book.fileCover%>" class="img-fluid rounded-start" alt="<%=book.fileName%>" style="max-height: 300px;min-height: 250px;">
+                </div>
+                <div class="col-md-10">
+                    <div class="card-body">
+                        <h6 class="card-title">Автор: <%=book.authors%></h6>
+                        <hr>
+                        <h5 class="card-title">Описание:</h5>
+                        <p class="card-text"><%=book.description%></p>
+
+                        <form action="/book/download/<%=book.id%>" method="get" enctype="multipart/form-data">
+                            <button class="btn btn-primary" style="float: right; margin: 15px 0px">
+                                Скачать книгу
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--        this.title = title;-->
+<!--        this.description = description;-->
+<!--        this.authors = authors;-->
+<!--        this.favorite = favorite;-->
+<!--        this.fileCover = fileCover;-->
+<!--        this.fileName = fileName;-->
+<!--        this.fileBook = fileBook;-->
+<!--        this.id = id;-->
+
+

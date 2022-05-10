@@ -1,0 +1,48 @@
+<%- include("../partials/head", {title: title}) %>
+<%- include("../partials/nav") %>
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4" style="text-align: center"> Редактировать книгу</h1>
+        <div class="form-floating" style="width: 100%;display: flex;justify-content: center;margin: 30px 0px;">
+            <form enctype="multipart/form-data" method="post" action="/book/update/<%=book.id%>" style="width: 75%;padding: 30px 30px;border: 2px solid black;">
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Название книги</label>
+                    <input type="text" class="form-control" id="title" name="title" value="<%=book.title%>">
+                </div>
+                <div class="mb-3">
+                    <label for="authors" class="form-label">Автор</label>
+                    <input type="text" class="form-control" id="authors" name="authors" value="<%=book.authors%>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Описание</label>
+                    <textarea class="form-control" rows="10" id="description" name="description"><%=book.description%></textarea>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" name="favorite" id="favorite" value="<%=book.favorite%>">
+                    <label class="form-check-label" for="favorite">Отметить, если книга избранная</label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="fileCover">Загрузите обложку</label>
+                    <input type="file" class="form-control" name="fileCover" id="fileCover">
+
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="fileName">Название обложки</label>
+                    <input type="text" class="form-control" name="fileName" id="fileName" value="<%=book.fileName%>">
+
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="fileBook">Загрузите книжку</label>
+                    <input type="file" class="form-control" name="fileBook" id="fileBook ">
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">Добавить</button>
+
+            </form>    </div>
+    </div>
+</div>
