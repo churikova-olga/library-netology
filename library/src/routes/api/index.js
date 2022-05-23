@@ -6,12 +6,12 @@ const fileMiddleware = require('../../middleware/file');
 
 
 router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req, res)=>{
-    console.log(req.files)
+
     if (req.files) {
 
         const fileBook = req.files.fileBook[0].path;
         const fileCover = req.files.fileCover[0].path;
-        console.log(fileCover)
+
 
         const {title, description, authors, favorite, fileName} = req.body;
 
@@ -36,7 +36,7 @@ router.get('/:id', async(req,res)=>{
 
     const {id} = req.params;
     try {
-        const book = await Book.find(id).select('-__v');
+        const book = await Book.find({_id: id}).select('-__v');
         res.json(book);
     } catch (e) {
         console.error(e);
@@ -52,19 +52,22 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
 
 
     const {id} = req.params;
-    const book = await Book.find(id).select('-__v');
 
-    if (req.files.length) {
-        fileBook = req.files.fileBook[0].path;
-        fileCover = req.files.fileCover[0].path;
-    }
-    else {
-        fileCover = book[0].fileCover
-        fileBook = book[0].fileBook
-    }
-        const {title, description, authors, favorite, fileName} = req.body;
+    const {title, description, authors, favorite, fileName} = req.body;
+
+
     try {
-        await Book.findByIdAndUpdate(id, {
+        const book = await Book.find({_id: id}).select('-__v');
+        if (req.files.length) {
+            fileBook = req.files.fileBook[0].path;
+            fileCover = req.files.fileCover[0].path;
+        }
+        else {
+            fileCover = book[0].fileCover
+            fileBook = book[0].fileBook
+        }
+
+        await Book.findByIdAndUpdate({_id: id} , {
                 title,
                 description,
                 authors,
@@ -73,7 +76,7 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
                 fileName,
                 fileBook,
         });
-        res.json(book);
+        res.redirect(`/api/book/${id}`);
     } catch (e) {
         console.error(e);
         res.status(500).json({errormessage: "Internal Server Error"});
@@ -84,8 +87,8 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
 router.delete('/:id', async(req,res) =>{
     const {id} = req.params;
     try {
-        const book = await Book.find(id).select('-__v');
-        res.json(book);
+        await Book.deleteOne({_id: id});
+        res.json(true);
     } catch (e) {
         console.error(e);
         res.status(500).json({errormessage: "Internal Server Error"});
@@ -95,11 +98,11 @@ router.delete('/:id', async(req,res) =>{
 
 router.get('/:id/download', async (req, res) => {
     const {id} = req.params;
-    const book = await Book.find(id).select('-__v');
+    const book = await Book.find({_id: id}).select('-__v');
 
     try {
         console.log(`${book[0].fileBook}`)
-        res.download(`${book[0].fileBook}`, 'fileBook', err=> {
+        res.download(`${book[0].fileBook}`, err=> {
             if (err) {
                 res.status(404).json({errormessage: "file not found"});
             }

@@ -15,7 +15,7 @@ const bookSchema = new Schema({
         default: "",
     },
     favorite: {
-        type: Boolean,
+        type: String,
         default: "",
     },
     fileCover: {
