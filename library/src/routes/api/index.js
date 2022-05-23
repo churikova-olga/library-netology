@@ -1,58 +1,70 @@
-
 const express = require('express');
 const router = express.Router();
 const Book = require("../../models/Book");
 const fileMiddleware = require('../../middleware/file');
 
 
-const stor = {
-    book: [],
 
-};
+router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req, res)=>{
+    console.log(req.files)
+    if (req.files) {
 
-router.post('/', fileMiddleware.single('fileBook'), (req, res)=>{
-    if (req.file) {
-        const {path} = req.file;
-        const {title, description, authors, favorite, fileCover, fileName} = req.body;
-        console.log(req.body)
-        const newBook = new Book(title, description, authors, favorite, fileCover, fileName, path);
-        stor.book.push(newBook);
-        res.status(201);
-        res.json(newBook);
-    } else {
-        res.json(null);
+        const fileBook = req.files.fileBook[0].path;
+        const fileCover = req.files.fileCover[0].path;
+        console.log(fileCover)
+
+        const {title, description, authors, favorite, fileName} = req.body;
+
+        const newBook = new Book({title, description, authors, favorite, fileCover, fileName, fileBook});
+
+        try {
+            await newBook.save();
+            res.json(newBook);
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({errormessage: "Internal Server Error"});
+        }
     }
 })
 
-router.get('/', (req, res)=>{
-    const {book} = stor;
+router.get('/', async (req, res)=>{
+    const book = await Book.find().select('-__v');
     res.json(book);
 })
 
-router.get('/:id', (req,res)=>{
-    const {book} = stor;
-    const {id} = req.params;
-    const idx = book.findIndex(el => el.id === id);
+router.get('/:id', async(req,res)=>{
 
-    if (idx !== -1) {
-        res.json(book[idx]);
-    } else {
-        res.status(404);
-        res.json("todo | not found");
+    const {id} = req.params;
+    try {
+        const book = await Book.find(id).select('-__v');
+        res.json(book);
+    } catch (e) {
+        console.error(e);
+        res.status(404).json({errormessage: "book | not found"});
     }
+
 })
 
-router.put('/:id',  fileMiddleware.single('fileBook'), (req,res)=>{
-    if (req.file) {
-        const {path} = req.file;
-        const {book} = stor;
-        const {id} = req.params;
-        const idx = book.findIndex(el => el.id === id);
-        const fileBook = path;
-        const {title, description, authors, favorite, fileCover, fileName} = req.body;
-        if (idx !== -1) {
-            book[idx] = {
-                ...book[idx],
+router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req,res)=>{
+
+    let fileBook = ""
+    let fileCover = ""
+
+
+    const {id} = req.params;
+    const book = await Book.find(id).select('-__v');
+
+    if (req.files.length) {
+        fileBook = req.files.fileBook[0].path;
+        fileCover = req.files.fileCover[0].path;
+    }
+    else {
+        fileCover = book[0].fileCover
+        fileBook = book[0].fileBook
+    }
+        const {title, description, authors, favorite, fileName} = req.body;
+    try {
+        await Book.findByIdAndUpdate(id, {
                 title,
                 description,
                 authors,
@@ -60,43 +72,43 @@ router.put('/:id',  fileMiddleware.single('fileBook'), (req,res)=>{
                 fileCover,
                 fileName,
                 fileBook,
-            }
-            res.json(book[idx]);
-        } else {
-            res.status(404);
-            res.json("todo | not found");
-        }
+        });
+        res.json(book);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({errormessage: "Internal Server Error"});
     }
+
 })
 
-router.delete('/:id', (req,res) =>{
-    const {book} = stor;
+router.delete('/:id', async(req,res) =>{
     const {id} = req.params;
-    const idx = book.findIndex(el => el.id === id);
-    if (idx !== -1) {
-        book.splice(idx, 1);
-        res.json('OK');
-    } else {
-        res.status(404);
-        res.json("book | not found");
+    try {
+        const book = await Book.find(id).select('-__v');
+        res.json(book);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({errormessage: "Internal Server Error"});
     }
+
 })
 
-router.get('/:id/download', (req, res) => {
+router.get('/:id/download', async (req, res) => {
     const {id} = req.params;
-    const {book} = stor;
-    const idx = book.findIndex(el => el.id === id);
-    if (idx !== -1) {
-        console.log(`${book[idx].fileBook}`)
-        res.download(`${book[idx].fileBook}`, 'fileBook', err=> {
+    const book = await Book.find(id).select('-__v');
 
+    try {
+        console.log(`${book[0].fileBook}`)
+        res.download(`${book[0].fileBook}`, 'fileBook', err=> {
             if (err) {
-                res.status(404).json();
+                res.status(404).json({errormessage: "file not found"});
             }
-        })}else {
-        res.status(404);
-        res.json("book | not found");
+        })
+    } catch (e) {
+        console.error(e);
+        res.status(404).json({errormessage: "book | not found"});
     }
+
 
 });
 

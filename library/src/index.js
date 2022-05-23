@@ -1,6 +1,7 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
-const PORT = process.env.PORT || 3000
+
 
 const errorMiddleware = require('./middleware/error');
 
@@ -27,6 +28,29 @@ app.use('/api/user', userRouter);
 
 app.use(errorMiddleware)
 
-app.listen(PORT, () => {
-    console.log(`=== start server PORT ${PORT} ===`);
-});
+const PORT = process.env.PORT || 3000;
+const UserDB = process.env.DB_USERNAME || 'root';
+const PasswordDB = process.env.DB_PASSWORD || '12345';
+const NameDB = process.env.DB_NAME || 'book_database'
+const HostDb = process.env.DB_HOST || 'mongodb://localhost:27017/'
+console.log(NameDB)
+async function start() {
+    try {
+
+        await mongoose.connect(HostDb, {
+            user: UserDB,
+            pass: PasswordDB,
+            dbName: NameDB,
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        })
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+start();

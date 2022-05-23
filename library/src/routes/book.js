@@ -4,17 +4,13 @@ const Book = require("../models/Book");
 const fileMiddleware = require('../middleware/file');
 const request = require('request')
 
-const stor = {
-    book: [],
-};
 
 
 router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]),  (req, res)=>{
     if (req.files) {
         const fileBook = req.files.fileBook[0].path;
-
         const fileCover = req.files.fileCover[0].path;
-        console.log(fileCover)
+
 
         const {title, description, authors, favorite, fileName} = req.body;
         console.log(req.body)
@@ -64,7 +60,7 @@ router.get('/:id', (req,res)=>{
     if (idx !== -1) {
 
         request.post({
-            url:  `http://library-netology-counter-1:3001/counter/${id}/incr`,
+            url:  `http://library-netology_counter_1:3001/counter/${id}/incr`,
         }, (err, response, body) => {
             res.render('book/view', {
                 title: book[idx].title,
@@ -83,6 +79,7 @@ router.get('/:id', (req,res)=>{
 router.post('/update/:id', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), (req,res)=>{
     let fileBook = ""
     let fileCover = ""
+
     const {book} = stor;
     const {id} = req.params;
     const idx = book.findIndex(el => el.id === id);
