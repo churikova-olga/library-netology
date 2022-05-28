@@ -1,0 +1,12 @@
+<%- include("../partials/head", {title: title}) %>
+<%- include("../partials/nav") %>
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1>ПРОФИЛЬ</h1>
+        <div style="margin: 10px 10px">
+        <p>Имя: <%=user.firstName%></p>
+        <p>Фамилия: <%=user.lastName%></p>
+        <p>Email: <%=user.email%></p>
+        </div>
+    </div>
+</div>

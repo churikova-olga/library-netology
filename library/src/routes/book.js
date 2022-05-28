@@ -3,10 +3,10 @@ const router = express.Router();
 const Book = require("../models/Book");
 const fileMiddleware = require('../middleware/file');
 const request = require('request')
+const isLoggedIn = require("../middleware/auth");
 
 
-
-router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async  (req, res)=>{
+router.post('/', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async  (req, res)=>{
     if (req.files) {
 
         const fileBook = req.files.fileBook[0].path;
@@ -28,20 +28,20 @@ router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { nam
     }
 })
 
-router.get('/create', (req, res)=>{
+router.get('/create',isLoggedIn, (req, res)=>{
     res.render('book/create',{
         title: "Create",
     })
 })
 
-router.get('/', async (req, res)=>{
+router.get('/',isLoggedIn,  async (req, res)=>{
     const book = await Book.find().select('-__v');
     res.render('book/index',{
         title: "Book",
-        book: book
+        book: book,
     })
 })
-router.get('/update/:id', async (req, res)=> {
+router.get('/update/:id',isLoggedIn, async (req, res)=> {
 
     const {id} = req.params;
 
@@ -50,7 +50,7 @@ router.get('/update/:id', async (req, res)=> {
         const book = await Book.findById({_id: id});
         res.render('book/update',{
             title: `${book.title} | update`,
-            book: book
+            book: book,
         })
     } catch (e) {
         console.error(e);
@@ -59,7 +59,7 @@ router.get('/update/:id', async (req, res)=> {
 
 })
 
-router.get('/:id', async (req,res)=>{
+router.get('/:id', isLoggedIn, async (req,res)=>{
 
     const {id} = req.params;
     try {
@@ -73,7 +73,7 @@ router.get('/:id', async (req,res)=>{
                 res.render('book/view', {
                     title: book.title,
                     book: book,
-                    counter: body
+                    counter: body,
                 })
             })
     } catch (e) {
@@ -85,7 +85,7 @@ router.get('/:id', async (req,res)=>{
 
 
 
-router.post('/update/:id', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req,res)=>{
+router.post('/update/:id', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req,res)=>{
 
     let fileBook = ""
     let fileCover = ""
@@ -125,7 +125,7 @@ router.post('/update/:id', fileMiddleware.fields([{ name: 'fileBook', maxCount: 
 })
 
 
-router.post('/:id', async (req,res) =>{
+router.post('/:id',isLoggedIn,  async (req,res) =>{
 
     const {id} = req.params;
     try {
@@ -138,7 +138,7 @@ router.post('/:id', async (req,res) =>{
 
 })
 
-router.get('/download/:id', async (req, res) => {
+router.get('/download/:id',isLoggedIn, async (req, res) => {
 
     const {id} = req.params;
     const book = await Book.findById({_id: id});

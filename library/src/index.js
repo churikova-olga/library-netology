@@ -1,39 +1,65 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
-
+const passport = require('passport')
+const bodyParser = require('body-parser')
+const flash = require('connect-flash');
 
 const errorMiddleware = require('./middleware/error');
 
-const indexApiRouter = require('./routes/api');
+const indexApiRouter = require('./routes/api/index');
 const indexRouter = require('./routes/book');
 const userRouter = require('./routes/user');
+const userAPIRouter = require('./routes/api/userAPI');
 const homeRouter = require('./routes/index');
 
+const COOKIE_SECRET = process.env.COOKIE_SECRET
+
 const app = express();
+
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 app.set("view engine", "ejs");
 app.set('views', 'src/views');
 
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
 
 app.use('/src/public', express.static(__dirname+"/public"));
 console.log(__dirname+"/public")
 
+app.use(require('express-session')({
+    secret: COOKIE_SECRET,
+    resave: false,
+    saveUninitialized: false,
+}))
+
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(flash());
+
+require('./passport-config')(passport);
+
+
 app.use('/', homeRouter);
 app.use('/book', indexRouter);
 app.use('/api/book', indexApiRouter);
-app.use('/api/user', userRouter);
+app.use('/api/user', userAPIRouter);
+app.use('/user', userRouter);
+
+
+
 
 app.use(errorMiddleware)
+
+
 
 const PORT = process.env.PORT || 3000;
 const UserDB = process.env.DB_USERNAME || 'root';
 const PasswordDB = process.env.DB_PASSWORD || '12345';
 const NameDB = process.env.DB_NAME || 'book_database'
 const HostDb = process.env.DB_HOST || 'mongodb://localhost:27017/'
-console.log(NameDB)
+
+
 async function start() {
     try {
 
@@ -52,5 +78,6 @@ async function start() {
         console.log(e);
     }
 }
+
 
 start();
