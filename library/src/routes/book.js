@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Book = require("../models/Book");
+const Comment = require("../models/Comment");
 const fileMiddleware = require('../middleware/file');
 const request = require('request')
 const isLoggedIn = require("../middleware/auth");
@@ -60,11 +61,11 @@ router.get('/update/:id',isLoggedIn, async (req, res)=> {
 })
 
 router.get('/:id', isLoggedIn, async (req,res)=>{
-
+    const user = req.user
     const {id} = req.params;
     try {
         const book = await Book.findById({_id: id});
-
+        const comment = await Comment.find({idBook: id})
 
              await request.post({
                 url:  `http://library-netology_counter_1:3001/counter/${id}/incr`,
@@ -74,6 +75,8 @@ router.get('/:id', isLoggedIn, async (req,res)=>{
                     title: book.title,
                     book: book,
                     counter: body,
+                    user: user,
+                    comment: comment
                 })
             })
     } catch (e) {

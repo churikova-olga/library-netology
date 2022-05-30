@@ -3,10 +3,12 @@
 
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-        <div class="card">
+        <input id="book" type="hidden" value="<%=book._id%>">
+
+        <div class="card" style="margin-top: 20px">
             <div class="card-header" style="display: flex;justify-content: space-between;">
 
-                <h1 class="display-4"> <%=book.title%></h1>
+                <h1 id="bookName" class="display-4"> <%=book.title%></h1>
                 <div style="display: flex;flex-direction: column;">
                     <i>  Просмотры: <b><%=counter%></b></i>
                 <i><%if(book.favorite === 'on'){%> Избранная<%}else{%> Не избранная<%}%></i>
@@ -33,16 +35,90 @@
                 </div>
             </div>
         </div>
+
+        <div class="card" style="margin-top: 20px">
+            <div class="card-header" style="display: flex;justify-content: space-between;">
+                <h5> Оставить комментарий</h5>
+            </div>
+
+            <div class="row g-0">
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <input id="userName" type="hidden" value="<%=user.firstName%> <%=user.lastName%>">
+                            <label for="text" class="form-label">Комментарий</label>
+                            <textarea placeholder="текст комментария..." class="form-control" id="text" name="comment" rows="6"></textarea>
+                            <button type="submit" id="send-room" class="btn btn-primary" style="float: right; margin: 15px 0px">
+                                Отправить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin: 20px 0">
+            <div class="card-header" style="display: flex;justify-content: space-between;">
+                <h5> Комментарии </h5>
+            </div>
+            <div class="row g-0">
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <div id="list" class="list-group">
+                            <%for(let i = 0; i < comment.length; i++){%>
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <small><%=comment[i].username%></small>
+                                        <small class="text-muted"><%=comment[i].date%></small>
+                                     </div>
+                                     <p class="mb-1"><%=comment[i].text%></p>
+                                 </div>
+                            <%}%>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!--        this.title = title;-->
-<!--        this.description = description;-->
-<!--        this.authors = authors;-->
-<!--        this.favorite = favorite;-->
-<!--        this.fileCover = fileCover;-->
-<!--        this.fileName = fileName;-->
-<!--        this.fileBook = fileBook;-->
-<!--        this.id = id;-->
+<script>
+    const roomName = location.pathname.split('/').pop();
+    const socket = io.connect('/', {query: `roomName=${roomName}`});
+    const boxList = document.querySelector('#list');
+    const inputUsername = document.querySelector('#userName');
+    const inputText = document.querySelector('#text');
+    const sendRoom = document.querySelector('#send-room');
+    const bookName = document.querySelector('#bookName');
+    const user = document.querySelector('#user');
+    const book = document.querySelector('#book');
+
+    const getTmp = (msg) => {
+        return `
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <small>${msg.username}</small>
+                        <small class="text-muted">${msg.date}</small>
+                    </div>
+                    <p class="mb-1">${msg.text}</p>
+                </div>
+        `;
+    };
+
+
+    socket.on('message-to-room', (msg) => {
+        const div = getTmp(msg);
+        boxList.insertAdjacentHTML('beforeend', div);
+    });
+
+    sendRoom.addEventListener('click', () => {
+        socket.emit('message-to-room', {
+            text: inputText.value,
+            book: book.value,
+            username: inputUsername.value,
+            date: new Date()
+        });
+    });
+
+</script>
 
 
