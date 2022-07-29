@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Book = require("../../models/Book");
 const fileMiddleware = require('../../middleware/file');
+const container = require("../../container");
+const {BooksRepository} = require("../../BooksRepository");
 
 
 
 router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req, res)=>{
-
+    const repo = container.get(BooksRepository);
     if (req.files) {
 
         const fileBook = req.files.fileBook[0].path;
@@ -14,11 +16,9 @@ router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { nam
 
 
         const {title, description, authors, favorite, fileName} = req.body;
-
-        const newBook = new Book({title, description, authors, favorite, fileCover, fileName, fileBook});
-
         try {
-            await newBook.save();
+            const newBook = await repo.createBook({title, description, authors, favorite, fileCover, fileName, fileBook});
+            res.status(201);
             res.json(newBook);
         } catch (e) {
             console.error(e);
@@ -28,15 +28,16 @@ router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { nam
 })
 
 router.get('/', async (req, res)=>{
-    const book = await Book.find().select('-__v');
-    res.json(book);
+    const repo  = container.get(BooksRepository);
+    const books = await repo.getBooks()
+    res.json(books);
 })
 
 router.get('/:id', async(req,res)=>{
-
+    const repo = container.get(BooksRepository);
     const {id} = req.params;
     try {
-        const book = await Book.find({_id: id}).select('-__v');
+        const book = await repo.getBook(id)
         res.json(book);
     } catch (e) {
         console.error(e);
@@ -50,24 +51,24 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
     let fileBook = ""
     let fileCover = ""
 
-
+    const repo = container.get(BooksRepository);
     const {id} = req.params;
 
     const {title, description, authors, favorite, fileName} = req.body;
 
 
     try {
-        const book = await Book.find({_id: id}).select('-__v');
+        const book = await repo.getBook(id)
         if (req.files.length) {
             fileBook = req.files.fileBook[0].path;
             fileCover = req.files.fileCover[0].path;
         }
         else {
-            fileCover = book[0].fileCover
-            fileBook = book[0].fileBook
+            fileCover = book.fileCover
+            fileBook = book.fileBook
         }
 
-        await Book.findByIdAndUpdate({_id: id} , {
+        await repo.updateBook(id, {
                 title,
                 description,
                 authors,
@@ -86,8 +87,10 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
 
 router.delete('/:id', async(req,res) =>{
     const {id} = req.params;
+    const repo = container.get(BooksRepository);
+
     try {
-        await Book.deleteOne({_id: id});
+        await repo.deleteBook(id);
         res.json(true);
     } catch (e) {
         console.error(e);
@@ -98,11 +101,12 @@ router.delete('/:id', async(req,res) =>{
 
 router.get('/:id/download', async (req, res) => {
     const {id} = req.params;
-    const book = await Book.find({_id: id}).select('-__v');
+    const repo = container.get(BooksRepository);
+    const book = await repo.getBook(id)
 
     try {
-        console.log(`${book[0].fileBook}`)
-        res.download(`${book[0].fileBook}`, err=> {
+        console.log(`${book.fileBook}`)
+        res.download(`${book.fileBook}`, err=> {
             if (err) {
                 res.status(404).json({errormessage: "file not found"});
             }

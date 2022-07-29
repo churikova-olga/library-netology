@@ -5,21 +5,22 @@ const Comment = require("../models/Comment");
 const fileMiddleware = require('../middleware/file');
 const request = require('request')
 const isLoggedIn = require("../middleware/auth");
-
+import {BooksRepository} from "../BooksRepository";
+import container from "../container";
 
 router.post('/', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async  (req, res)=>{
     if (req.files) {
-
+        const repo = container.get(BooksRepository);
         const fileBook = req.files.fileBook[0].path;
         const fileCover = req.files.fileCover[0].path;
 
 
         const {title, description, authors, favorite, fileName} = req.body;
 
-        const newBook = new Book({title, description, authors, favorite, fileCover, fileName, fileBook});
-
         try {
-            await newBook.save();
+
+            await repo.createBook({title, description, authors, favorite, fileCover, fileName, fileBook});
+
             res.status(201);
             res.redirect('/book/')
         } catch (e) {
@@ -36,7 +37,10 @@ router.get('/create',isLoggedIn, (req, res)=>{
 })
 
 router.get('/',isLoggedIn,  async (req, res)=>{
-    const book = await Book.find().select('-__v');
+
+    const repo = container.get(BooksRepository);
+    const book = await repo.getBooks()
+
     res.render('book/index',{
         title: "Book",
         book: book,
@@ -45,10 +49,11 @@ router.get('/',isLoggedIn,  async (req, res)=>{
 router.get('/update/:id',isLoggedIn, async (req, res)=> {
 
     const {id} = req.params;
+    const repo = container.get(BooksRepository);
 
     try {
 
-        const book = await Book.findById({_id: id});
+        const book = await repo.getBook(id)
         res.render('book/update',{
             title: `${book.title} | update`,
             book: book,
@@ -63,8 +68,9 @@ router.get('/update/:id',isLoggedIn, async (req, res)=> {
 router.get('/:id', isLoggedIn, async (req,res)=>{
     const user = req.user
     const {id} = req.params;
+    const repo = container.get(BooksRepository);
     try {
-        const book = await Book.findById({_id: id});
+        const book = await repo.getBook(id)
         const comment = await Comment.find({idBook: id})
 
              await request.post({
@@ -92,7 +98,7 @@ router.post('/update/:id', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook'
 
     let fileBook = ""
     let fileCover = ""
-
+    const repo = container.get(BooksRepository);
 
     const {id} = req.params;
 
@@ -100,7 +106,7 @@ router.post('/update/:id', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook'
 
 
     try {
-        const book = await Book.findById({_id: id});
+        const book = await repo.getBook(id)
         if (req.files.length) {
             fileBook = req.files.fileBook[0].path;
             fileCover = req.files.fileCover[0].path;
@@ -110,7 +116,7 @@ router.post('/update/:id', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook'
             fileBook = book.fileBook
         }
 
-        await Book.findByIdAndUpdate({_id: id} , {
+        await repo.updateBook(id , {
             title,
             description,
             authors,
@@ -129,10 +135,10 @@ router.post('/update/:id', isLoggedIn, fileMiddleware.fields([{ name: 'fileBook'
 
 
 router.post('/:id',isLoggedIn,  async (req,res) =>{
-
+    const repo = container.get(BooksRepository);
     const {id} = req.params;
     try {
-        await Book.deleteOne({_id: id});
+        await repo.deleteBook(id);
         res.redirect('/book/')
     } catch (e) {
         console.error(e);
@@ -142,9 +148,9 @@ router.post('/:id',isLoggedIn,  async (req,res) =>{
 })
 
 router.get('/download/:id',isLoggedIn, async (req, res) => {
-
+    const repo = container.get(BooksRepository);
     const {id} = req.params;
-    const book = await Book.findById({_id: id});
+    const book = await repo.getBook(id);
 
     try {
         console.log(`${book.fileBook}`)
