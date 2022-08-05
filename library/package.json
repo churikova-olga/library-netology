@@ -1,7 +1,8 @@
 {
+  "main": "src/index.ts",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon --ignore sessions/ src/index.js",
+    "dev": "nodemon --ignore sessions/ dist/index.js ",
+    "start": "node dist/index.js",
     "build": "tsc --project ./tsconfig.json --watch",
     "test": "echo \"Error: no test specifed\" && exit 1",
     "eslint": "eslint --cache --ext .js,.jsx,.ts,.tsx src",
@@ -12,6 +13,7 @@
     "body-parser": "^1.20.0",
     "connect-flash": "^0.1.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
     "ejs": "^3.1.7",
     "express": "^4.18.0",
     "express-session": "^1.17.3",
@@ -26,6 +28,8 @@
     "socket.io": "^4.5.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/multer": "^1.4.7",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "eslint": "^8.20.0",

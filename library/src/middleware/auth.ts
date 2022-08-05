@@ -1,4 +1,6 @@
-function isLoggedIn(req, res, next) {
+import {Response, NextFunction } from 'express';
+
+export default function isLoggedIn(req: any, res: Response, next: NextFunction) {
     // if user is authenticated in the session, carry on
     if (req.isAuthenticated())
         return next();
@@ -6,5 +8,3 @@ function isLoggedIn(req, res, next) {
     // if they aren't redirect them to the page
     res.redirect('/user/login');
 }
-
-module.exports = isLoggedIn

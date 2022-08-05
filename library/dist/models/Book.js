@@ -1,6 +1,8 @@
-const {Schema, model} = require('mongoose');
-
-const bookSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BookModel = void 0;
+const mongoose_1 = require("mongoose");
+const bookSchema = new mongoose_1.Schema({
     title: {
         type: String,
         required: true,
@@ -29,8 +31,6 @@ const bookSchema = new Schema({
         type: String,
         required: true,
     },
-
 });
-
-
-module.exports = model('Book', bookSchema);
+const BookModel = (0, mongoose_1.model)('Book', bookSchema);
+exports.BookModel = BookModel;

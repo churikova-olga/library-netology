@@ -1,5 +1,5 @@
 interface IBook {
-    id: string,
+    id?: string,
     title: string,
     description: string,
     authors: string,

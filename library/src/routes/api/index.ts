@@ -1,18 +1,19 @@
-const express = require('express');
+import express from 'express';
+import {Request, Response} from 'express'
+
+import {fileMiddleware} from '../../middleware/file';
+import {container} from "../../infra/container";
+import {BooksRepository} from "../../infra/BooksRepository";
+
+
 const router = express.Router();
-const Book = require("../../models/Book");
-const fileMiddleware = require('../../middleware/file');
-const container = require("../../container");
-const {BooksRepository} = require("../../BooksRepository");
 
-
-
-router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req, res)=>{
+router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { name: 'fileCover', maxCount: 1 }]), async (req: Request, res: Response)=>{
     const repo = container.get(BooksRepository);
     if (req.files) {
-
-        const fileBook = req.files.fileBook[0].path;
-        const fileCover = req.files.fileCover[0].path;
+        const files = req.files as  {[fieldname: string]: Express.Multer.File[]};
+        const fileBook  = files['fileBook'][0].path;
+        const fileCover = files['fileCover'][0].path;
 
 
         const {title, description, authors, favorite, fileName} = req.body;
@@ -28,13 +29,13 @@ router.post('/', fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, { nam
 })
 
 router.get('/', async (req, res)=>{
-    const repo  = container.get(BooksRepository);
+    const repo: BooksRepository = container.get(BooksRepository);
     const books = await repo.getBooks()
     res.json(books);
 })
 
 router.get('/:id', async(req,res)=>{
-    const repo = container.get(BooksRepository);
+    const repo: BooksRepository = container.get(BooksRepository);
     const {id} = req.params;
     try {
         const book = await repo.getBook(id)
@@ -51,7 +52,7 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
     let fileBook = ""
     let fileCover = ""
 
-    const repo = container.get(BooksRepository);
+    const repo: BooksRepository = container.get(BooksRepository);
     const {id} = req.params;
 
     const {title, description, authors, favorite, fileName} = req.body;
@@ -60,8 +61,10 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
     try {
         const book = await repo.getBook(id)
         if (req.files.length) {
-            fileBook = req.files.fileBook[0].path;
-            fileCover = req.files.fileCover[0].path;
+            const files = req.files as {[fieldname: string]: Express.Multer.File[]};
+            fileBook = files['fileBook'][0].path;
+            fileCover = files['fileCover'][0].path;
+
         }
         else {
             fileCover = book.fileCover
@@ -87,7 +90,7 @@ router.put('/:id',   fileMiddleware.fields([{ name: 'fileBook', maxCount: 1 }, {
 
 router.delete('/:id', async(req,res) =>{
     const {id} = req.params;
-    const repo = container.get(BooksRepository);
+    const repo: BooksRepository = container.get(BooksRepository);
 
     try {
         await repo.deleteBook(id);
@@ -101,7 +104,7 @@ router.delete('/:id', async(req,res) =>{
 
 router.get('/:id/download', async (req, res) => {
     const {id} = req.params;
-    const repo = container.get(BooksRepository);
+    const repo: BooksRepository = container.get(BooksRepository);
     const book = await repo.getBook(id)
 
     try {
@@ -119,4 +122,4 @@ router.get('/:id/download', async (req, res) => {
 
 });
 
-module.exports = router;
+export default router;
