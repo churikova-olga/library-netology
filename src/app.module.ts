@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { BookModule } from './book/book.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as dotenv from 'dotenv';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 dotenv.config();
 
 const UserDB: string = process.env.DB_USERNAME || 'olga';
@@ -16,6 +18,8 @@ const NameDB = 'book_database';
       `mongodb+srv://${UserDB}:${PasswordDB}@cluster0.rhhgpyk.mongodb.net/${NameDB}?retryWrites=true&w=majority`,
     ),
     BookModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
