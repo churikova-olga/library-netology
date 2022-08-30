@@ -1,20 +1,60 @@
 import { Test } from '@nestjs/testing';
+
 import { BookController } from './book.controller';
 import { BookService } from './book.service';
 
-describe('BookController', () => {
-  let controller: BookController;
+const mockBook = (
+  id = 'id',
+  title = 'title',
+  description = 'description',
+  authors = 'authors',
+  favorite = 'favorite',
+  fileCover = 'fileCover',
+  fileName = 'fileName',
+  fileBook = 'fileBook',
+) => ({
+  id,
+  title,
+  description,
+  authors,
+  favorite,
+  fileCover,
+  fileName,
+  fileBook,
+});
+
+describe('BooksController', () => {
+  let bookController: BookController;
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [BookController],
-      providers: [BookService],
+      providers: [
+        {
+          provide: BookService,
+          useValue: {
+            createBook: jest.fn().mockResolvedValue(mockBook()),
+            getBooks: jest.fn().mockResolvedValue([mockBook(), mockBook()]),
+            updateBook: jest.fn().mockResolvedValue(mockBook()),
+          },
+        },
+      ],
     }).compile();
 
-    controller = module.get<BookController>(BookController);
+    bookController = moduleRef.get<BookController>(BookController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('createBook', async () => {
+    expect(await bookController.createBook(mockBook())).toEqual(mockBook());
+  });
+
+  it('getAllBooks', async () => {
+    expect(await bookController.getBooks()).toEqual([mockBook(), mockBook()]);
+  });
+
+  it('updateBook', async () => {
+    expect(await bookController.updateBook({ id: 'id' }, mockBook())).toEqual(
+      mockBook(),
+    );
   });
 });

@@ -11,9 +11,9 @@ export class BookService {
     private readonly BookModel: Model<BookDocument>,
   ) {}
 
-  public createBook(data: BookInterfaces): Promise<BookDocument> {
-    const book = new this.BookModel(data);
-    return book.save();
+  public async createBook(data: BookInterfaces): Promise<BookDocument> {
+    const book = await this.BookModel.create(data);
+    return book;
   }
 
   public getBooks(): Promise<BookDocument[]> {
