@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import * as dotenv from 'dotenv';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { BookCommentModule } from './book/comment/book.comment.module';
 dotenv.config();
 
 const UserDB: string = process.env.DB_USERNAME || 'olga';
@@ -20,6 +21,7 @@ const NameDB = 'book_database';
     BookModule,
     AuthModule,
     UserModule,
+    BookCommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
